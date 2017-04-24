@@ -10,7 +10,7 @@ else:
     import __builtin__
 
 
-def make_builtin(func):
+def make_builtin(func, name=None):
     """Make a function act like a built-in function in Python.
 
     This is intended to be used sparingly and really only for adding
@@ -22,13 +22,29 @@ def make_builtin(func):
     Args:
         func: The function to make a built-in
 
+    Keyword Args:
+        name: The name to register the function as if needed.
+
     Returns:
         The same function unmodified.
     """
 
     if PYTHON_3:
-        setattr(builtins, func.__name__, func)
+        setattr(builtins, name or func.__name__, func)
     else:
-        setattr(__builtin__, func.__name__, func)
+        setattr(__builtin__, name or func.__name__, func)
 
     return func
+
+
+def remove_builtin(name):
+    """Remove a built-in function.
+
+    Args:
+        name: The function to remove
+    """
+
+    if PYTHON_3:
+        delattr(builtins, name)
+    else:
+        delattr(__builtin__, name)
