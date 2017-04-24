@@ -6,7 +6,7 @@ from inspect import isfunction
 from .get_func_args import get_func_args
 
 
-def combine_args(dec):
+def combine_args(dec, method=False):
     """Wrap a decorator so it doesn't have to return another.
 
     This decorator simplies others and makes the other decorator able
@@ -21,8 +21,16 @@ def combine_args(dec):
     parenthesis with the Python decorator notation before the
     function definition as seen in the examples below.
 
+    If the function is a method and has 'self' as the first argument,
+    set the keyword argument method to True, not that this function
+    may not be a decorator in this case, instead use
+    combine_args_self.
+
     Args:
         dec: The decorator to wrap.
+
+    Keyword Args:
+        method: Whether this function is a method.
 
     Returns:
         The wrapped decorator.
@@ -70,15 +78,38 @@ def combine_args(dec):
         # accepts the function and then returns the original
         # decorator with all the arguments.
 
-        if (len(args) > 0 and isfunction(args[0])) or \
-                get_func_args(dec)[0] in kwargs:
+        required = 0
+
+        if method: required += 1
+
+        if (len(args) > required and isfunction(args[required])) or \
+                get_func_args(dec)[required] in kwargs:
             return dec(*args, **kwargs)
 
         def inner_wrap(func):
-            added_args = (func, ) + args
+            added_args = (func, ) + args[required:]
+
+            if method: added_args = (args[0], ) + added_args
 
             return dec(*added_args, **kwargs)
 
         return inner_wrap
 
     return wrapped_dec
+
+
+def combine_args_self(dec):
+    """Wrap a method decorator so it doesn't have to return another.
+
+    This behaves similarly to combine_args except that it works with
+    methods without using the keyword argument. This can be used as
+    a decorator.
+
+    Args:
+        dec: The method decorator to wrap.
+
+    Returns:
+        The wrapped method decorator.
+    """
+
+    return combine_args(dec, method=True)
