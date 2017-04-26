@@ -4,6 +4,7 @@ from functools import wraps
 
 from .runner import Runner
 from .util import make_builtin
+from .version import __version__
 
 
 EXPORTED_RUNNER_METHODS = [
