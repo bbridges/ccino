@@ -1,35 +1,13 @@
--
-    # Test the first section of basic functionality.
-    #
-    # Limtied to basic use of suite(), test(), and the debug
-    # reporter.
-
-    source: test/core/test-primary.py
-    reporter: debug
-    bail: true
-    out: test/core/out/primary-report.txt
+defaults:
     mirror: true
-    stdout: test/core/out/primary-print.txt
     stdout_mirror: true
--
-    # Test the second section of basic functionality.
-    #
-    # These tests finishing testing all components needed to run the
-    # rest of the ccino tests. No tests after this point should use
-    # components not tested here.
-    #
-    # Only suite(), test(), and the debug reporter can be used from
-    # the primary tests.
 
-    source: test/core/test-secondary.py
-    reporter: debug
-    bail: true
-    out: test/core/out/secondary-report.txt
-    mirror: true
-    stdout: test/core/out/secondary-print.txt
-    stdout_mirror: true
--
-    # Test all other features given what has been tested above.
+tests:
+    -
+        # Test the first section of basic functionality.
+        #
+        # Limtied to basic use of suite(), test(), and the debug
+        # reporter.
 
         source: test/core/test-primary.py
         reporter: debug
