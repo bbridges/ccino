@@ -36,4 +36,3 @@ def load_module(module_path):
 
 
 insert_into_globals(main_runner)
-insert_into_builtins(main_runner)

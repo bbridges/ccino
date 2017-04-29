@@ -6,7 +6,7 @@ import sys
 
 import click
 
-from . import main_runner
+from . import main_runner, insert_into_globals, insert_into_builtins
 from .reporters import get_reporter_names, get_reporter_desc
 from .util import load_module
 from .version import __version__
@@ -96,4 +96,28 @@ def check_reporter(name):
         expose_value=False, is_eager=True,
         help='Show the current version and exit.')
 def run(files, **options):
-    pass
+    open_files = []
+
+    if not options['reporter'] == None:
+        reporter = check_reporter(options['reporter'])
+
+        main_runner.reporter(reporter)
+
+    if not options['out'] == None:
+        out = click.open_file(options['out'], 'w')
+
+        main_runner.output(out)
+
+    insert_into_globals(main_runner)
+    insert_into_builtins(main_runner)
+
+    for file in files:
+        load_module(file)
+
+    try:
+        main_runner.run_tests()
+    except Exception as e:
+        raise click.ClickException('Unknown error while running tests.')
+    finally:
+        for file in open_files:
+            file.close()

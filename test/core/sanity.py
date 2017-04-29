@@ -1,8 +1,8 @@
-from __future__ import print_statement
+from __future__ import print_function
 
 
 @suite
-def suite():
+def sanity_suite():
     @test
-    def test():
+    def sanity_test():
         print('sanity test')
