@@ -7,18 +7,31 @@ from .reporters import get_reporter, get_reporter_names
 from .root import RootSuite
 from .suite import Suite
 from .test import Test
-from .util import load_module, redirect_print
+from .util import load_module, redirect_print, make_builtin
 from .util.decorator_wraps import combine_args_self
 from .util.timer import Timer
 
+
+def _get_options_checker(options):
+    def check_options(key, default):
+        return key in options and getattr(options, key) or default
+
+    return check_options
+
+
 class Runner(object):
-    def __init__(self):
+    def __init__(self, **options):
         self._root = RootSuite()
         self._current_suite = self._root
 
-        self._reporter = 'default'
-        self._output = None
-        self._stdout = None
+        check_options = _get_options_checker(options)
+
+        self._verbosity = check_options('verbosity', 0)
+        self._bail = check_options('bail', False)
+        self._color = check_options('color', True)
+        self._reporter = check_options('reporter', 'default')
+        self._output = check_options('output', sys.stdout)
+        self._stdout = check_options('stdout', sys.stdout)
 
     @combine_args_self
     def suite(self, func, name=None):
@@ -73,8 +86,7 @@ class Runner(object):
     def run_tests(self):
         reporter = get_reporter(self._reporter)
 
-        if self._output:
-            reporter.output(self._output)
+        reporter.output(self._output)
 
         def test_pass(test):
             reporter.test_pass_b
@@ -85,10 +97,7 @@ class Runner(object):
         t = Timer()
         t.start()
 
-        if not self._stdout == None:
-            with redirect_print(self._stdout):
-                self._root.run(reporter)
-        else:
+        with redirect_print(self._stdout):
             self._root.run(reporter)
 
         t.stop()
@@ -102,3 +111,25 @@ class Runner(object):
     # after = suite_teardown
     # before_each = setup
     # after_each = teardown
+
+
+EXPORTED_RUNNER_METHODS = [
+    'suite',
+    'test',
+    'suite_setup',
+    'suite_teardown',
+    'setup',
+    'teardown',
+    'describe',
+    'it'
+]
+
+
+def insert_into_globals(runner):
+    for name in EXPORTED_RUNNER_METHODS:
+        globals()[name] = getattr(runner, name)
+
+
+def insert_into_builtins(runner):
+    for name in EXPORTED_RUNNER_METHODS:
+        make_builtin(getattr(runner, name), name)

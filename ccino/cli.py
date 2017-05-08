@@ -6,8 +6,9 @@ import sys
 
 import click
 
-from . import main_runner, insert_into_globals, insert_into_builtins
+from . import main_runner
 from .reporters import get_reporter_names, get_reporter_desc
+from .runner import insert_into_globals, insert_into_builtins
 from .util import load_module
 from .version import __version__
 
@@ -65,6 +66,7 @@ def check_reporter(name):
 @click.command(context_settings=settings, options_metavar='[options]')
 @click.argument('files', nargs=-1, metavar='[files]',
         type=click.Path(exists=True, resolve_path=True))
+@click.option('--verbose', '-v', count=True, help='Increase verbosity. TODO')
 @click.option('--bail', '-b', 'bail', flag_value='True',
         help='Stop running after a test failure. TODO')
 @click.option('--no-bail', '-B', 'bail', flag_value='False',
@@ -75,14 +77,16 @@ def check_reporter(name):
         help='Force no color output. TODO')
 @click.option('--recursive', '-r', count=True,
         help='Load in subdirectories. TODO')
+@click.option('--no-builtins', 'builtins', flag_value='False',
+        help='Don\'t add ccino functions to the builtins.')
 @click.option('--config', metavar='<path>', type=click.Path(resolve_path=True),
         default=DEFAULT_CONFIG, help='Specify the config file.')
 @click.option('--save', is_flag=True,
         help='Save the current options in the config file. TODO')
 @click.option('--out', metavar='<file>', type=click.Path(resolve_path=True),
-        help='Save the output to a file. TODO')
+        help='Save the output to a file.')
 @click.option('--stdout', metavar='<file>', type=click.Path(resolve_path=True),
-        help='Save the stdout output to a file. TODO')
+        help='Save the stdout output to a file.')
 @click.option('--mirror', flag_value='True',
         help='Also print the output to the console. TODO')
 @click.option('--mirror-stdout', flag_value='True',
@@ -98,15 +102,22 @@ def check_reporter(name):
 def run(files, **options):
     open_files = []
 
-    if not options['reporter'] == None:
+    if not options['reporter'] is None:
         reporter = check_reporter(options['reporter'])
 
         main_runner.reporter(reporter)
 
-    if not options['out'] == None:
+    if not options['out'] is None:
         out = click.open_file(options['out'], 'w')
 
         main_runner.output(out)
+        open_files.append(out)
+
+    if not options['stdout'] is None:
+        stdout = click.open_file(options['stdout'], 'w')
+
+        main_runner.stdout(stdout)
+        open_files.append(stdout)
 
     insert_into_globals(main_runner)
     insert_into_builtins(main_runner)
