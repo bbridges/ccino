@@ -1,6 +1,8 @@
 ccino
 ==
 
+[![Build Status](https://travis-ci.com/bloof-bb/ccino.svg?token=i58uqsNTypCSHwaT2j4f&branch=master)](https://travis-ci.com/bloof-bb/ccino)
+
 > A Python unit test framework based on Mocha
 
 ### Sample Test
