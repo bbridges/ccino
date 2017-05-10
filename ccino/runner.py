@@ -28,7 +28,8 @@ class Runner(object):
 
         self._verbosity = check_options('verbosity', 0)
         self._bail = check_options('bail', False)
-        self._color = check_options('color', True)
+        self._color = check_options('color', None)
+        self._exc_context = check_options('exc_context', False)
         self._reporter = check_options('reporter', 'default')
         self._output = check_options('output', sys.stdout)
         self._stdout = check_options('stdout', sys.stdout)
@@ -77,22 +78,26 @@ class Runner(object):
 
         self._reporter = reporter
 
+    def color(self, use_color=None):
+        self._color = use_color
+
     def output(self, stream):
         self._output = stream
 
     def stdout(self, stream):
         self._stdout = stream
 
+    def exc_context(self, show=True):
+        self._exc_context = show
+
     def run_tests(self):
         reporter = get_reporter(self._reporter)
 
         reporter.output(self._output)
-
-        def test_pass(test):
-            reporter.test_pass_b
+        reporter.color(self._color)
+        reporter.exc_context(self._exc_context)
 
         reporter.base_start()
-        reporter.start()
 
         t = Timer()
         t.start()
@@ -103,7 +108,6 @@ class Runner(object):
         t.stop()
 
         reporter.base_end(t.get_time())
-        reporter.end(t.get_time())
 
     describe = suite
     it = test

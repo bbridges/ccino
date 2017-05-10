@@ -1,30 +1,57 @@
-from __future__ import print_function
+from __future__ import division
 
 import sys
 import traceback
 
-
-PYTHON_3 = sys.version_info[0] == 3
-
-
-if PYTHON_3:
-    from io import StringIO
-else:
-    from StringIO import StringIO
-
-
-import colorama
 import blessings
-
 
 from ..hook import Hook
 from ..test import Test
 
 
+WINDOWS = sys.platform == 'win32'
+
+
+CHECK_SYMBOL = u'\u2713' if not WINDOWS else u'\u221A'
+ERROR_SYMBOL = u'\u2716' if not WINDOWS else u'\u00D7'
+
+
+def format_seconds_short(seconds):
+    round_n = lambda n: int(round(n))
+
+    if seconds >= 3600:
+        return str(round_n(seconds / 3600)) + 'h'
+
+    if seconds >= 60:
+        return str(round_n(seconds / 60)) + 'm'
+
+    if seconds >= 1:
+        return str(round_n(seconds)) + 's'
+
+    if seconds >= 1e-3:
+        return str(round_n(seconds * 1e3)) + 'ms'
+
+    return str(max(round_n(seconds * 1e6), 1)) + u'\u00B5s'
+
+
 class BaseReporter(object):
     def __init__(self):
-        self._stream = None
+        self._stream = sys.stdout
         self._mirror = False
+        self._force_color = False
+        self._exc_context = False
+
+        self._terminal = None
+
+    def color(self, use_color=None):
+        if use_color == False:
+            self._force_color = None
+        elif use_color == True:
+            self._force_color = True
+        elif use_color == None:
+            self._force_color = False
+        else:
+            raise TypeError('use_color must be bool or None')
 
     def output(self, stream):
         self._stream = stream
@@ -33,11 +60,33 @@ class BaseReporter(object):
         if self._stream:
             self._stream.write(string)
 
-        if not self._stream or self._mirror:
-            print(string, end='')
-
     def mirror(self, on=True):
         self._mirror = on
+
+    def exc_context(self, show=True):
+        self._exc_context = show
+
+    def _get_last_exception(self):
+        info = sys.exc_info()
+
+        exc = self.terminal.red(
+            ''.join(traceback.format_exception_only(*info[0:2]))
+        )
+
+        tb = traceback.extract_tb(info[2])
+        tb_msg = ''
+
+        for trace in reversed(tb):
+            tb_msg += ' at {:s} ({:s}:{:d})\n'.format(
+                trace[2], trace[0], trace[1]
+            )
+
+            if self._exc_context and trace[3] is not None:
+                tb_msg += '   {:s}\n'.format(trace[3])
+
+        tb_msg = self.terminal.bright_black(tb_msg)
+
+        return exc + tb_msg
 
     def base_start(self):
         self.num_suites = 0
@@ -49,6 +98,10 @@ class BaseReporter(object):
 
         self.open_suites = []
         self.errors = []
+
+        self._terminal = blessings.Terminal(
+            stream=self._stream, force_styling=self._force_color
+        )
 
         self.start()
 
@@ -77,11 +130,7 @@ class BaseReporter(object):
     def base_test_fail(self, test):
         self.num_failures += 1
 
-        err_out = StringIO()
-
-        traceback.print_exc(file=err_out)
-
-        self.errors.append((test, err_out.getvalue()))
+        self.errors.append((test, self._get_last_exception()))
 
         self.test_fail(test)
 
@@ -96,11 +145,7 @@ class BaseReporter(object):
     def base_hook_fail(self, hook):
         self.num_failures += 1
 
-        err_out = StringIO()
-
-        traceback.print_exc(file=err_out)
-
-        self.errors.append((hook, err_out.getvalue()))
+        self.errors.append((test, self._get_last_exception()))
 
         self.hook_fail(hook)
 
@@ -137,15 +182,42 @@ class BaseReporter(object):
         pass
 
     def print_summary(self):
+        if self.num_passes:
+            passes = self.terminal.green(
+                '  {:d} passing'.format(self.num_passes)
+            )
+
+            time = self.terminal.bright_black(
+                '({:s})'.format(format_seconds_short(self.time))
+            )
+
+            self.write(passes + ' ' + time + '\n')
+
+        if self.num_pending:
+            self.write(self.terminal.cyan(
+                '  {:d} passing\n'.format(self.num_pending)
+            ))
+
+        if self.num_failures:
+            self.write(self.terminal.red(
+                '  {:d} failing\n'.format(self.num_failures)
+            ))
+
         for i in range(self.num_failures):
             runnable = self.errors[i][0]
             error = self.errors[i][1]
 
             desc = ''
 
-            if isinstance(runnable, Test): pass
+            if isinstance(runnable, Test):
+                desc = runnable.desc
 
+            number = '{:d})'.format(self.num_failures)
 
-            self.write('\n  {:d}) {:s}\n'.format(i, desc))
+            self.write('\n  ' + number + ' ' + desc + '\n')
 
-            self.write('\n' + error + '\n')
+            self.write('     ' + error.replace('\n', '\n     '))
+
+    @property
+    def terminal(self):
+        return self._terminal
