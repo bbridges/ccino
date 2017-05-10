@@ -109,6 +109,8 @@ class Runner(object):
 
         reporter.base_end(t.get_time())
 
+        return reporter.num_failures == 0
+
     describe = suite
     it = test
     # before = suite_setup

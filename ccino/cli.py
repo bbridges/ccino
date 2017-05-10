@@ -5,6 +5,7 @@ import platform
 import sys
 
 import click
+import coverage
 
 from . import main_runner
 from .reporters import get_reporter_names, get_reporter_desc
@@ -106,7 +107,7 @@ def bool_str(string):
 @click.option('--exc-context', flag_value='True',
         help='Show context in stack trace if possible.')
 @click.option('--cover', flag_value='True',
-        help='Output coverage information using coverage.py. TODO')
+        help='Output coverage information using coverage.py.')
 @click.option('--reporters', is_flag=True, callback=print_reporters,
         expose_value=False, is_eager=True,
         help='List available reporters and exit.')
@@ -148,13 +149,36 @@ def run(files, **options):
     if options['builtins'] is None:
         insert_into_builtins(main_runner)
 
+    cov = None
+    success = True
+
+    if options['cover'] is not None:
+        cov = coverage.Coverage()
+        cov.start()
+
     for file in files:
         load_module(file)
 
     try:
-        main_runner.run_tests()
+        success = main_runner.run_tests()
     except Exception as e:
         raise click.ClickException('Unknown error while running tests.')
+
+        if cov is not None:
+            cov.stop()
+
+        sys.exit(1)
+
+    else:
+        if cov is not None:
+            cov.stop()
+            cov.save()
+
+            cov.html_report()
+
+        if not success:
+            sys.exit(1)
+
     finally:
         for file in open_files:
             file.close()
