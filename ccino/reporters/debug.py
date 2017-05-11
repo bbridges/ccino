@@ -1,34 +1,68 @@
 from __future__ import absolute_import
 
-from .base import BaseReporter
+from .base import BaseReporter, override
 
 
 class DebugReporter(BaseReporter):
+    """Debug reporter for debugging ccino.
+
+    This reporter is verbose and prints something for each base print
+    method. A summary is not printed in the end.
+
+    This is not intended for regular use.
+    """
+
+    @override
     def start(self):
         self.write('starting tests\n')
 
+    @override
     def suite_start(self, suite):
-        self.write('\n' + '  ' * self.num_open_suites + 'entering suite \'{:s}\'\n'.format(suite.name))
+        padding = '  ' * self.num_open_suites
 
+        self.write('\n' + padding + 'entering suite \'' + suite.name + '\'\n')
+
+    @override
     def suite_end(self, suite):
-        self.write('  ' * (self.num_open_suites + 1) + 'exiting suite \'{:s}\'\n\n'.format(suite.name))
+        padding = '  ' * (self.num_open_suites + 1)
 
+        self.write(padding + 'exiting suite \'' + suite.name + '\'\n\n')
+
+    @override
     def test_pass(self, test):
-        self.write('  ' * (self.num_open_suites + 1) + 'test \'{:s}\' passed\n'.format(test.desc))
+        padding = '  ' * (self.num_open_suites + 1)
 
+        self.write(padding + 'test \'' + test.desc + '\' passed\n')
+
+    @override
     def test_fail(self, test):
-        self.write('  ' * (self.num_open_suites + 1) + 'test \'{:s}\' failed ({:d})\n'.format(test.desc, self.num_failures - 1))
+        padding = '  ' * (self.num_open_suites + 1)
+        num = '({:d})'.format(self.num_failures - 1)
 
+        self.write(padding + 'test \'' + test.desc + '\' failed ' + num + '\n')
+
+    @override
     def test_pending(self, test):
-        self.write('  ' * self.num_open_suites + 'test \'{:s}\' pending\n'.format(test.desc))
+        padding = '  ' * (self.num_open_suites + 1)
 
+        self.write(padding + 'test \'' + test.desc + '\' pending\n')
+
+    @override
     def hook_pass(self, hook):
-        self.write('  ' * (self.num_open_suites + 1) + 'ran hook \'{:s}\'\n'.format(hook.desc))
+        padding = '  ' * (self.num_open_suites + 1)
 
+        self.write(padding + 'ran hook \'{:s}\'\n'.format(hook.desc))
+
+    @override
     def hook_fail(self, hook):
-        self.write('  ' * (self.num_open_suites + 1) + 'hook \'{:s}\' failed ({:d})\n'.format(hook.desc, self.num_failures - 1))
+        padding = '  ' * (self.num_open_suites + 1)
+        num = '({:d})'.format(self.num_failures - 1)
 
+        self.write(padding + 'hook \'' + hook.desc + '\' failed ' + num + '\n')
+
+    @override
     def end(self, time):
-        self.write('stopped running tests, took {:012.6f} seconds\n'.format(time))
+        summary = 'stopped running tests, took {:012.6f} seconds\n' \
+                .format(time)
 
-        # self.print_summary()
+        self.write(summary)
