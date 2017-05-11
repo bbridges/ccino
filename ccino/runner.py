@@ -48,30 +48,49 @@ class Runner(object):
 
         self._current_suite = curr_suite
 
+        return func
+
     @combine_args_self
     def test(self, func, desc=None):
         test = Test(func, self._current_suite, desc)
         self._current_suite.add_test(test)
+
+        return func
 
     @combine_args_self
     def suite_setup(self, func, desc=None):
         hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_suite_setup(hook)
 
+        return func
+
     @combine_args_self
     def suite_teardown(self, func, desc=None):
         hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_suite_teardown(hook)
+
+        return func
 
     @combine_args_self
     def setup(self, func, desc=None):
         hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_setup(hook)
 
+        return func
+
     @combine_args_self
     def teardown(self, func, desc=None):
         hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_teardown(hook)
+
+        return func
+
+    @combine_args_self
+    def skip(self, func, condition=True):
+        if condition:
+            func._skip = True
+
+        return func
 
     def bail(self, stop=True):
         self._bail = stop
@@ -137,7 +156,8 @@ EXPORTED_RUNNER_METHODS = [
     'before',
     'after',
     'before_each',
-    'after_each'
+    'after_each',
+    'skip'
 ]
 
 

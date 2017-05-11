@@ -421,7 +421,7 @@ class BaseReporter(object):
         # If any tests are pending, print out how many.
         if self.num_pending:
             self.write(self.terminal.cyan(
-                '  {:d} passing\n'.format(self.num_pending)
+                '  {:d} pending\n'.format(self.num_pending)
             ))
 
         # If any tests failed, print out how many.

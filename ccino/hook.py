@@ -12,7 +12,9 @@ class Hook(Runnable):
         self._func = func
 
     def run(self, reporter, bail):
-        if self._skip:
+        super(Hook, self).run(reporter, bail)
+
+        if self.skipped:
             return
 
         num_arguments = get_num_args(self._func)

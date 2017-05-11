@@ -12,7 +12,9 @@ class Test(Runnable):
         self._func = func
 
     def run(self, reporter, bail):
-        if self._skip:
+        super(Test, self).run(reporter, bail)
+
+        if self.skipped:
             reporter.base_test_pending(self)
             return
 

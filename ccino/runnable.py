@@ -9,13 +9,12 @@ class Runnable(object):
         self._skip = False
 
     def run(self, reporter, bail):
-        raise NotImplementedError()
+        if not self.skipped and hasattr(self._func, '_skip') and \
+                self._func._skip == True:
+            self.skip()
 
     def skip(self):
         self._skip = True
-
-    def unskip(self):
-        self._skip = False
 
     @property
     def parent(self):
