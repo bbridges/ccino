@@ -1,3 +1,5 @@
+"""Contains general ccino utilities."""
+
 from __future__ import absolute_import
 
 from .get_func_args import get_func_args, get_num_args

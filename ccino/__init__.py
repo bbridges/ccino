@@ -1,9 +1,12 @@
+"""A Python testing framework inspired by Mocha."""
+
 from __future__ import absolute_import
 
-from .runner import Runner, insert_into_globals, insert_into_builtins
+from .runner import Runner
+from .runner import insert_into_globals as _insert_globals
 from .version import __version__
 
 
 main_runner = Runner()
 
-insert_into_globals(main_runner)
+_insert_globals(main_runner)

@@ -2,17 +2,36 @@
 
 import os
 
-from setuptools import setup, find_packages
+try:
+    from setuptools import setup, find_packages
+except:
+    raise Exception('setuptools is required for installation')
 
 
-def join(*args):
-    return os.path.normpath(os.path.join(*args))
+def join(*paths):
+    """Join and normalize several paths.
+
+    Args:
+        *paths (List[str]): The paths to join and normalize.
+
+    Returns:
+        str: The normalized path.
+    """
+
+    return os.path.normpath(os.path.join(*paths))
 
 
 VERSION_PATH = join(__file__, '..', 'ccino', 'version.py')
 REQUIREMENTS_PATH = join(__file__, '..', 'requirements.txt')
 
+
 def get_version():
+    """Get the version number without running version.py.
+
+    Returns:
+        str: The current ccino version.
+    """
+
     with open(VERSION_PATH, 'r') as version:
         out = {}
 
@@ -22,6 +41,12 @@ def get_version():
 
 
 def load_requirements():
+    """Get the requirements file in this directory.
+
+    Returns:
+        List[str]: A list of pip readable strings.
+    """
+
     with open(REQUIREMENTS_PATH, 'r') as requirements:
         return requirements.read().split('\n')
 

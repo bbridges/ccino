@@ -1,8 +1,11 @@
-from __future__ import absolute_import, print_function
+"""ccino module entry point."""
+
+from __future__ import absolute_import
 
 import sys
 
 from .cli import run
+
 
 if __name__ == '__main__':
     # Make Click print out 'python -m ccino' instead of '__main__.py'
