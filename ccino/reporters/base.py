@@ -162,7 +162,10 @@ class BaseReporter(object):
         """
 
         if self._stream:
-            self._stream.write(string)
+            try:
+                self._stream.write(string)
+            except UnicodeEncodeError as e:
+                self._stream.write(string.encode('utf-8'))
 
     def mirror(self, on=True):
         """Mirror the output to stdout.
