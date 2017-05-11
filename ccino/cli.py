@@ -69,13 +69,13 @@ def to_bool(value):
     if type(value) == 'bool':
         return value
 
-    if value == 'True':
+    if str(value) == 'True':
         return True
 
-    if value == 'False':
+    if str(value) == 'False':
         return False
 
-    return ValueError('value must be \'True\' or \'False\' or a bool')
+    raise ValueError('value must be \'True\' or \'False\' or a bool')
 
 
 @click.command(context_settings=settings, options_metavar='[options]')
@@ -96,10 +96,11 @@ def to_bool(value):
         help='Load in subdirectories. TODO')
 @click.option('--no-builtins', 'builtins', flag_value='False',
         help='Don\'t add ccino functions to the builtins.')
-@click.option('--config', metavar='<path>', type=click.Path(resolve_path=True),
-        default=DEFAULT_CONFIG, help='Specify the config file.')
-@click.option('--save', is_flag=True,
-        help='Save the current options in the config file. TODO')
+@click.option('--config', metavar='<path>',
+        type=click.Path(exists=True, resolve_path=True),
+        help='Specify the config file.')
+@click.option('--no-config', flag_value='True',
+        help="Do not use a config file.")
 @click.option('--out', metavar='<file>', type=click.Path(resolve_path=True),
         help='Save the output to a file.')
 @click.option('--stdout', metavar='<file>', type=click.Path(resolve_path=True),
@@ -121,7 +122,13 @@ def to_bool(value):
 def run(files, **options):
     open_files = []
 
-    if os.path.isfile(options['config']):
+    if options['config'] is None:
+        options['config'] = DEFAULT_CONFIG
+
+    use_config = options['no_config'] is None or \
+            not to_bool(options['no_config'])
+
+    if use_config and os.path.isfile(options['config']):
         config_file = click.open_file(options['config'], 'r+')
         config = yaml.load(config_file.read())
 
@@ -219,7 +226,6 @@ def run(files, **options):
 
         if not success:
             sys.exit(1)
-
     finally:
         for file in open_files:
             file.close()
