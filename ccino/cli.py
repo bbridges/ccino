@@ -6,6 +6,7 @@ import sys
 
 import click
 import coverage
+import yaml
 
 from . import main_runner
 from .reporters import get_reporter_names, get_reporter_desc
@@ -117,6 +118,38 @@ def bool_str(string):
 def run(files, **options):
     open_files = []
 
+    if os.path.isfile(options['config']):
+        config_file = click.open_file(options['config'], 'r+')
+        config = yaml.load(config_file.read())
+
+        if files == tuple() and 'source' in config:
+            source = config['source']
+
+            files = source if type(source) == 'list' else [source]
+
+        if options['reporter'] is None and 'reporter' in config:
+            options['reporter'] = config['reporter']
+
+        if options['color'] is None and 'color' in config:
+            options['color'] = config['color']
+
+        if options['out'] is None and 'out' in config:
+            options['out'] = config['out']
+
+        if options['stdout'] is None and 'stdout' in config:
+            options['stdout'] = config['stdout']
+
+        if options['exc_context'] is None and 'exc_context' in config:
+            options['exc_context'] = config['exc_context']
+
+        if options['builtins'] is None and 'builtins' in config:
+            options['builtins'] = config['builtins']
+
+        open_files.append(config_file)
+
+    if files == tuple():
+        files = ['test']
+
     if options['reporter'] is not None:
         reporter = check_reporter(options['reporter'])
 
@@ -162,13 +195,10 @@ def run(files, **options):
     try:
         success = main_runner.run_tests()
     except Exception as e:
-        raise click.ClickException('Unknown error while running tests.')
-
         if cov is not None:
             cov.stop()
 
-        sys.exit(1)
-
+        raise Exception('Unknown error while running tests.')
     else:
         if cov is not None:
             cov.stop()
