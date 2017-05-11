@@ -96,7 +96,7 @@ def load_dir(path, recursive):
 @click.command(context_settings=settings, options_metavar='[options]')
 @click.argument('files', nargs=-1, metavar='[files]',
         type=click.Path(exists=True, resolve_path=True))
-@click.option('--verbose', '-v', count=True, help='Increase verbosity. TODO')
+# @click.option('--verbose', '-v', count=True, help='Increase verbosity.')
 @click.option('--bail', '-b', 'bail', flag_value='True',
         help='Stop running after a test failure.')
 @click.option('--no-bail', '-B', 'bail', flag_value='False',
@@ -120,10 +120,10 @@ def load_dir(path, recursive):
         help='Save the output to a file.')
 @click.option('--stdout', metavar='<file>', type=click.Path(resolve_path=True),
         help='Save the stdout output to a file.')
-@click.option('--mirror', flag_value='True',
-        help='Also print the output to the console. TODO')
-@click.option('--mirror-stdout', flag_value='True',
-        help='Also print the stdout output to the console. TODO')
+# @click.option('--mirror', flag_value='True',
+#         help='Also print the output to the console.')
+# @click.option('--mirror-stdout', flag_value='True',
+#         help='Also print the stdout output to the console.')
 @click.option('--exc-context', flag_value='True',
         help='Show context in stack trace if possible.')
 @click.option('--cover', flag_value='True',
