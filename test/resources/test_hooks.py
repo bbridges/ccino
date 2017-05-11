@@ -1,5 +1,24 @@
 from __future__ import print_function
 
+# Expected Output
+# 1
+# 2
+# 3
+# 2
+# 4
+# 5
+# 6
+# 2
+# 7
+# 8
+# 9
+# 2
+# 7
+# 8
+# 10
+# 2
+# 11
+
 
 @suite('Hooks')
 def hooks_suite():
