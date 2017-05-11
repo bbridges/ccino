@@ -6,19 +6,16 @@ from .util import get_num_args
 
 
 class Test(Runnable):
-    def __init__(self, func, parent, name=None):
-        super(Test, self).__init__(func, parent, name)
-
-        self._func = func
-
-    def run(self, reporter, bail):
-        super(Test, self).run(reporter, bail)
+    def run(self, reporter, options):
+        super(Test, self).run(reporter, options)
 
         if self.skipped:
             reporter.base_test_pending(self)
             return
 
-        num_arguments = get_num_args(self._func)
+        bail = options['bail']
+
+        num_arguments = get_num_args(self.func)
         result = None
 
         if num_arguments > 1:
@@ -26,19 +23,19 @@ class Test(Runnable):
 
         try:
             if num_arguments == 0:
-                result = self._func()
+                result = self.func()
             else:
-                result = self._func(self)
+                result = self.func(self)
         except Exception as e:
             reporter.base_test_fail(self)
 
             if bail:
                 raise CcinoBail()
         else:
-            if hasattr(self._func, '_returns'):
-                return_value = self._func._returns
+            if hasattr(self.func, '_returns'):
+                return_value = self.func._returns
 
-                if self._func._returns_approx and \
+                if self.func._returns_approx and \
                         abs(result - return_value[0]) > return_value[1]:
                     try:
                         raise Exception(

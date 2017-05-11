@@ -33,14 +33,14 @@ class Suite(Runnable):
     def add_teardown(self, hook):
         self._teardowns.append(hook)
 
-    def run(self, reporter, bail):
-        super(Suite, self).run(reporter, bail)
+    def run(self, reporter, options):
+        super(Suite, self).run(reporter, options)
 
         reporter.base_suite_start(self)
 
         if not self.skipped:
             for suite_setup in self._suite_setups:
-                suite_setup.run(reporter, bail)
+                suite_setup.run(reporter, options)
 
         for test in self._tests:
             is_suite = isinstance(test, Suite)
@@ -53,21 +53,21 @@ class Suite(Runnable):
             if not is_suite and not self.skipped:
                 for suite in reversed(open_suites):
                     for setup in suite._setups:
-                        setup.run(reporter, bail)
+                        setup.run(reporter, options)
 
             if self.skipped:
                 test.skip()
 
-            test.run(reporter, bail)
+            test.run(reporter, options)
 
             if not is_suite and not self.skipped:
                 for suite in reversed(open_suites):
                     for teardown in suite._teardowns:
-                        teardown.run(reporter, bail)
+                        teardown.run(reporter, options)
 
         if not self.skipped:
             for suite_teardown in self._suite_teardowns:
-                suite_teardown.run(reporter, bail)
+                suite_teardown.run(reporter, options)
 
         reporter.base_suite_end(self)
 

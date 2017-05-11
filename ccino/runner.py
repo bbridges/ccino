@@ -127,7 +127,10 @@ class Runner(object):
 
         try:
             with redirect_print(self._stdout):
-                self._root.run(reporter, self._bail)
+                self._root.run(reporter, dict(
+                    bail=self._bail
+                ))
+
         except CcinoBail as e: pass
 
         t.stop()
