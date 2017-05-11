@@ -111,7 +111,7 @@ def load_dir(path, recursive):
         help='Load in subdirectories.')
 @click.option('--no-builtins', 'builtins', flag_value='False',
         help='Don\'t add ccino functions to the builtins.')
-@click.option('--config', metavar='<path>',
+@click.option('--config', metavar='<file>',
         type=click.Path(exists=True, resolve_path=True),
         help='Specify the config file.')
 @click.option('--no-config', flag_value='True',
