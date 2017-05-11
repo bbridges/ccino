@@ -92,6 +92,23 @@ class Runner(object):
 
         return func
 
+    @combine_args_self
+    def raises(self, func, exception):
+        func._raises = exception
+
+        return func
+
+    @combine_args_self
+    def returns(self, func, value, approx=None):
+        if approx is None:
+            func._returns = value
+            func._returns_approx = False
+        else:
+            func._returns = [value, approx]
+            func._returns_approx = True
+
+        return func
+
     def bail(self, stop=True):
         self._bail = stop
 
@@ -160,7 +177,9 @@ EXPORTED_RUNNER_METHODS = [
     'after',
     'before_each',
     'after_each',
-    'skip'
+    'skip',
+    'raises',
+    'returns'
 ]
 
 

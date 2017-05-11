@@ -1,8 +1,17 @@
 from __future__ import absolute_import
 
+from .exceptions import AlreadyRunnableException
+
 
 class Runnable(object):
     def __init__(self, func, parent, name=None):
+        if func is not None:
+            if hasattr(func, '_is_runnable') and \
+                    func._is_runnable == True:
+                raise AlreadyRunnableException()
+
+            func._is_runnable = True
+
         self._func = func
         self._parent = parent
         self._name = name or func.__name__
