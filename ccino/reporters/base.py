@@ -310,7 +310,7 @@ class BaseReporter(object):
 
         self.num_failures += 1
 
-        self.errors.append((test, self._get_last_exception()))
+        self.errors.append((hook, self._get_last_exception()))
 
         self.hook_fail(hook)
 
@@ -435,14 +435,11 @@ class BaseReporter(object):
             runnable = self.errors[i][0]
             error = self.errors[i][1]
 
-            desc = ''
+            name = runnable.name
 
-            if isinstance(runnable, Test):
-                desc = runnable.desc
+            number = '{:d})'.format(i)
 
-            number = '{:d})'.format(self.num_failures)
-
-            self.write('\n  ' + number + ' ' + desc + '\n')
+            self.write('\n  ' + number + ' ' + name + '\n')
             self.write('     ' + error.replace('\n', '\n     '))
 
     @property

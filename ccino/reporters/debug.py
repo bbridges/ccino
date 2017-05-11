@@ -32,33 +32,33 @@ class DebugReporter(BaseReporter):
     def test_pass(self, test):
         padding = '  ' * (self.num_open_suites + 1)
 
-        self.write(padding + 'test \'' + test.desc + '\' passed\n')
+        self.write(padding + 'test \'' + test.name + '\' passed\n')
 
     @override
     def test_fail(self, test):
         padding = '  ' * (self.num_open_suites + 1)
         num = '({:d})'.format(self.num_failures - 1)
 
-        self.write(padding + 'test \'' + test.desc + '\' failed ' + num + '\n')
+        self.write(padding + 'test \'' + test.name + '\' failed ' + num + '\n')
 
     @override
     def test_pending(self, test):
         padding = '  ' * (self.num_open_suites + 1)
 
-        self.write(padding + 'test \'' + test.desc + '\' pending\n')
+        self.write(padding + 'test \'' + test.name + '\' pending\n')
 
     @override
     def hook_pass(self, hook):
         padding = '  ' * (self.num_open_suites + 1)
 
-        self.write(padding + 'ran hook \'{:s}\'\n'.format(hook.desc))
+        self.write(padding + 'ran hook \'{:s}\'\n'.format(hook.name))
 
     @override
     def hook_fail(self, hook):
         padding = '  ' * (self.num_open_suites + 1)
         num = '({:d})'.format(self.num_failures - 1)
 
-        self.write(padding + 'hook \'' + hook.desc + '\' failed ' + num + '\n')
+        self.write(padding + 'hook \'' + hook.name + '\' failed ' + num + '\n')
 
     @override
     def end(self, time):

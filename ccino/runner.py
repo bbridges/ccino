@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import sys
 
+from .exceptions import CcinoBail
 from .hook import Hook
 from .reporters import get_reporter, get_reporter_names
 from .root import RootSuite
@@ -36,9 +37,9 @@ class Runner(object):
 
     @combine_args_self
     def suite(self, func, name=None):
-        curr_suite =  self._current_suite
+        curr_suite = self._current_suite
 
-        suite = Suite(func, name)
+        suite = Suite(func, curr_suite, name)
         curr_suite.add_suite(suite)
 
         self._current_suite = suite
@@ -49,28 +50,31 @@ class Runner(object):
 
     @combine_args_self
     def test(self, func, desc=None):
-        test = Test(func, desc)
+        test = Test(func, self._current_suite, desc)
         self._current_suite.add_test(test)
 
     @combine_args_self
     def suite_setup(self, func, desc=None):
-        hook = Hook(func, desc)
+        hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_suite_setup(hook)
 
     @combine_args_self
     def suite_teardown(self, func, desc=None):
-        hook = Hook(func, desc)
+        hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_suite_teardown(hook)
 
     @combine_args_self
     def setup(self, func, desc=None):
-        hook = Hook(func, desc)
+        hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_setup(hook)
 
     @combine_args_self
     def teardown(self, func, desc=None):
-        hook = Hook(func, desc)
+        hook = Hook(func, self._current_suite, desc)
         self._current_suite.add_teardown(hook)
+
+    def bail(self, stop=True):
+        self._bail = stop
 
     def reporter(self, reporter):
         if not reporter in get_reporter_names():
@@ -102,8 +106,10 @@ class Runner(object):
         t = Timer()
         t.start()
 
-        with redirect_print(self._stdout):
-            self._root.run(reporter)
+        try:
+            with redirect_print(self._stdout):
+                self._root.run(reporter, self._bail)
+        except CcinoBail as e: pass
 
         t.stop()
 
@@ -113,10 +119,10 @@ class Runner(object):
 
     describe = suite
     it = test
-    # before = suite_setup
-    # after = suite_teardown
-    # before_each = setup
-    # after_each = teardown
+    before = suite_setup
+    after = suite_teardown
+    before_each = setup
+    after_each = teardown
 
 
 EXPORTED_RUNNER_METHODS = [
@@ -127,7 +133,11 @@ EXPORTED_RUNNER_METHODS = [
     'setup',
     'teardown',
     'describe',
-    'it'
+    'it',
+    'before',
+    'after',
+    'before_each',
+    'after_each'
 ]
 
 

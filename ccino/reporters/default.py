@@ -24,9 +24,9 @@ class DefaultReporter(BaseReporter):
     def test_pass(self, test):
         padding = '  ' * (self.num_open_suites + 1)
         check = self.terminal.green(CHECK_SYMBOL)
-        desc = self.terminal.bright_black(test.desc)
+        name = self.terminal.bright_black(test.name)
 
-        message = padding + check + ' ' + desc + '\n'
+        message = padding + check + ' ' + name + '\n'
 
         self.write(message)
 
@@ -34,16 +34,16 @@ class DefaultReporter(BaseReporter):
     def test_fail(self, test):
         padding = '  ' * (self.num_open_suites + 1)
         number = self.terminal.red('{:d})'.format(self.num_failures - 1))
-        desc = self.terminal.red(test.desc)
+        name = self.terminal.red(test.name)
 
-        self.write(padding + number + ' ' + desc + '\n')
+        self.write(padding + number + ' ' + name + '\n')
 
     @override
     def test_pending(self, test):
         padding = '  ' * (self.num_open_suites + 1)
-        desc = self.terminal.cyan('- ' + test.desc)
+        name = self.terminal.cyan('- ' + test.name)
 
-        message = padding + desc + '\n'
+        message = padding + name + '\n'
 
         self.write(message)
 
@@ -51,9 +51,9 @@ class DefaultReporter(BaseReporter):
     def hook_fail(self, hook):
         padding = '  ' * (self.num_open_suites + 1)
         number = self.terminal.red('{:d})'.format(self.num_failures - 1))
-        desc = self.terminal.red(hook.desc)
+        name = self.terminal.red(hook.name)
 
-        self.write(padding + number + ' ' + desc + '\n')
+        self.write(padding + number + ' ' + name + '\n')
 
     @override
     def end(self, time):

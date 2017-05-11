@@ -83,9 +83,9 @@ def to_bool(value):
         type=click.Path(exists=True, resolve_path=True))
 @click.option('--verbose', '-v', count=True, help='Increase verbosity. TODO')
 @click.option('--bail', '-b', 'bail', flag_value='True',
-        help='Stop running after a test failure. TODO')
+        help='Stop running after a test failure.')
 @click.option('--no-bail', '-B', 'bail', flag_value='False',
-        help='Don\'t stop running after a test failure. TODO')
+        help='Don\'t stop running after a test failure.')
 @click.option('--reporter', '-R', metavar='<name>',
         help='Specify the reporter to use.')
 @click.option('--color', '-c', 'color', flag_value='True',
@@ -130,6 +130,9 @@ def run(files, **options):
 
             files = source if type(source) == 'list' else [source]
 
+        if options['bail'] is None and 'bail' in config:
+            options['bail'] = config['bail']
+
         if options['reporter'] is None and 'reporter' in config:
             options['reporter'] = config['reporter']
 
@@ -152,6 +155,11 @@ def run(files, **options):
 
     if files == tuple():
         files = ['test']
+
+    if options['bail'] is not None:
+        bail = to_bool(options['bail'])
+
+        main_runner.bail(bail)
 
     if options['reporter'] is not None:
         reporter = check_reporter(options['reporter'])

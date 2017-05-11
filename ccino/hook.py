@@ -1,17 +1,17 @@
 from __future__ import absolute_import
 
+from .exceptions import CcinoBail
 from .runnable import Runnable
 from .util import get_num_args
 
 
 class Hook(Runnable):
-    def __init__(self, func, desc=None):
-        super(Hook, self).__init__()
+    def __init__(self, func, parent, name=None):
+        super(Hook, self).__init__(func, parent, name)
 
         self._func = func
-        self._desc = desc or func.__name__
 
-    def execute_func(self, reporter):
+    def run(self, reporter, bail):
         if self._skip:
             return
 
@@ -27,5 +27,7 @@ class Hook(Runnable):
                 result = self._func(self)
         except Exception as e:
             reporter.base_hook_fail(self)
+
+            raise CcinoBail()
         else:
             reporter.base_hook_pass(self)

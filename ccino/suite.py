@@ -4,11 +4,10 @@ from .runnable import Runnable
 
 
 class Suite(Runnable):
-    def __init__(self, func, name=None):
-        super(Suite, self).__init__()
+    def __init__(self, func, parent, name=None):
+        super(Suite, self).__init__(func, parent, name)
 
         self._func = func
-        self._name = name or func.__name__
 
         self._tests = []
         self._suite_setups = []
@@ -22,12 +21,6 @@ class Suite(Runnable):
     def add_suite(self, suite):
         self._tests.append(suite)
 
-        for setup in self._setups:
-            suite.add_setup(setup)
-
-        for teardown in self._teardowns:
-            suite.add_teardown(teardown)
-
     def add_suite_setup(self, hook):
         self._suite_setups.append(hook)
 
@@ -37,42 +30,41 @@ class Suite(Runnable):
     def add_setup(self, hook):
         self._setups.append(hook)
 
-        for test in self._tests:
-            is_suite = isinstance(test, Suite)
-
-            if is_suite:
-                test.add_setup(hook)
-
     def add_teardown(self, hook):
         self._teardowns.append(hook)
 
-        for test in self._tests:
-            is_suite = isinstance(test, Suite)
-
-            if is_suite:
-                test.add_teardown(hook)
-
-    def execute_func(self, reporter):
+    def run(self, reporter, bail):
         reporter.base_suite_start(self)
 
         for suite_setup in self._suite_setups:
-            suite_setup.run(reporter)
+            suite_setup.run(reporter, bail)
 
         for test in self._tests:
             is_suite = isinstance(test, Suite)
 
-            if not is_suite:
-                for setup in self._setups:
-                    setup.run(reporter)
+            open_suites = [self]
 
-            test.run(reporter)
+            print('hmm')
+
+            while open_suites[-1].parent is not None:
+                open_suites.append(open_suites[-1].parent)
 
             if not is_suite:
-                for teardown in self._teardowns:
-                    teardown.run(reporter)
+                for suite in reversed(open_suites):
+                    for setup in suite._setups:
+                        setup.run(reporter, bail)
+
+
+
+            test.run(reporter, bail)
+
+            if not is_suite:
+                for suite in reversed(open_suites):
+                    for teardown in suite._teardowns:
+                        teardown.run(reporter, bail)
 
         for suite_teardown in self._suite_teardowns:
-            suite_teardown.run(reporter)
+            suite_teardown.run(reporter, bail)
 
         reporter.base_suite_end(self)
 
@@ -82,7 +74,3 @@ class Suite(Runnable):
     @property
     def is_root(self):
         return False
-
-    @property
-    def name(self):
-        return self._name

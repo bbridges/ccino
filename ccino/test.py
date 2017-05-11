@@ -1,16 +1,17 @@
 from __future__ import absolute_import
 
+from .exceptions import CcinoBail
 from .runnable import Runnable
 from .util import get_num_args
 
+
 class Test(Runnable):
-    def __init__(self, func, desc=None):
-        super(Test, self).__init__()
+    def __init__(self, func, parent, name=None):
+        super(Test, self).__init__(func, parent, name)
 
         self._func = func
-        self._desc = desc or func.__name__
 
-    def execute_func(self, reporter):
+    def run(self, reporter, bail):
         if self._skip:
             reporter.base_test_pending(self)
             return
@@ -28,6 +29,9 @@ class Test(Runnable):
                 result = self._func(self)
         except Exception as e:
             reporter.base_test_fail(self)
+
+            if bail:
+                raise CcinoBail()
         else:
             if hasattr(self._func, '_returns'):
                 return_value = self._func._returns
@@ -42,7 +46,8 @@ class Test(Runnable):
                     except Exception as e:
                         reporter.base_test_fail(self)
 
-
+                        if bail:
+                            raise CcinoBail()
 
                 elif not result == return_value:
                     e = Exception(
@@ -51,11 +56,10 @@ class Test(Runnable):
                     )
 
                     reporter.base_test_fail(self)
+
+                    if bail:
+                        raise CcinoBail()
                 else:
                     reporter.base_test_pass(self)
             else:
                 reporter.base_test_pass(self)
-
-    @property
-    def desc(self):
-        return self._desc
