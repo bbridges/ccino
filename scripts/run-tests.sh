@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Run the sanity check
-sanity="$(ccino test/core/sanity.py --out /dev/null)"
+sanity="$(ccino test/core/sanity.py --config false --out /dev/null)"
 
 if [ "$sanity" != "sanity test" ]; then
     echo 'Sanity test failed.'
