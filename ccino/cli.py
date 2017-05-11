@@ -78,6 +78,21 @@ def to_bool(value):
     raise ValueError('value must be \'True\' or \'False\' or a bool')
 
 
+def load_dir(path, recursive):
+    loaded = 0
+
+    for inner_path in os.listdir(path):
+        inner_path = os.path.join(path, inner_path)
+
+        if os.path.isfile(inner_path) and inner_path.endswith('.py'):
+            load_module(inner_path)
+            loaded += 1
+        elif os.path.isdir(inner_path) and recursive:
+            loaded += load_dir(inner_path, recursive)
+
+    return loaded
+
+
 @click.command(context_settings=settings, options_metavar='[options]')
 @click.argument('files', nargs=-1, metavar='[files]',
         type=click.Path(exists=True, resolve_path=True))
@@ -92,8 +107,8 @@ def to_bool(value):
         help='Force color output.')
 @click.option('--no-color', '-C', 'color', flag_value='False',
         help='Force no color output.')
-@click.option('--recursive', '-r', count=True,
-        help='Load in subdirectories. TODO')
+@click.option('--recursive', '-r', flag_value='True',
+        help='Load in subdirectories.')
 @click.option('--no-builtins', 'builtins', flag_value='False',
         help='Don\'t add ccino functions to the builtins.')
 @click.option('--config', metavar='<path>',
@@ -145,6 +160,9 @@ def run(files, **options):
 
         if options['color'] is None and 'color' in config:
             options['color'] = config['color']
+
+        if options['recursive'] is None and 'recursive' in config:
+            options['recursive'] = config['recursive']
 
         if options['out'] is None and 'out' in config:
             options['out'] = config['out']
@@ -207,8 +225,21 @@ def run(files, **options):
         cov = coverage.Coverage()
         cov.start()
 
-    for file in files:
-        load_module(file)
+    recursive = options['recursive'] is not None and \
+            to_bool(options['recursive'])
+
+    loaded = 0
+
+    for path in files:
+        if os.path.isfile(path):
+            load_module(path)
+            loaded += 1
+        elif os.path.isdir(path):
+            loaded += load_dir(path, recursive)
+
+    if loaded == 0:
+        click.echo('No test files found.')
+        return
 
     try:
         success = main_runner.run_tests()
