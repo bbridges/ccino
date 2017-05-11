@@ -65,14 +65,17 @@ def check_reporter(name):
     return name
 
 
-def bool_str(string):
-    if string == 'True':
+def to_bool(value):
+    if type(value) == 'bool':
+        return value
+
+    if value == 'True':
         return True
 
-    if string == 'False':
+    if value == 'False':
         return False
 
-    return ValueError('string must be \'True\' or \'False\'')
+    return ValueError('value must be \'True\' or \'False\' or a bool')
 
 
 @click.command(context_settings=settings, options_metavar='[options]')
@@ -156,7 +159,7 @@ def run(files, **options):
         main_runner.reporter(reporter)
 
     if options['color'] is not None:
-        use_color = bool_str(options['color'])
+        use_color = to_bool(options['color'])
 
         main_runner.color(use_color)
 
@@ -173,7 +176,7 @@ def run(files, **options):
         open_files.append(stdout)
 
     if options['exc_context'] is not None:
-        exc_context = bool_str(options['exc_context'])
+        exc_context = to_bool(options['exc_context'])
 
         main_runner.exc_context(exc_context)
 
