@@ -410,7 +410,7 @@ class BaseReporter(object):
             )
 
             time = self.terminal.bright_black(
-                '({:s})'.format(format_seconds_short(self.time))
+                '(' + format_seconds_short(self.time) + ')'
             )
 
             self.write(passes + ' ' + time + '\n')
