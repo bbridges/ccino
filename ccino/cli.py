@@ -25,6 +25,14 @@ settings = {
 
 
 def print_version(ctx, param, value):
+    """Print the current ccino verion.
+
+    Args:
+        ctx (:obj:`click.Context`): The click context.
+        param (str): The paramater name.
+        value (str): The paramter value.
+    """
+
     if not value or ctx.resilient_parsing:
         return
 
@@ -34,6 +42,14 @@ def print_version(ctx, param, value):
 
 
 def print_reporters(ctx, param, value):
+    """Print the list of reporters.
+
+    Args:
+        ctx (:obj:`click.Context`): The click context.
+        param (str): The paramater name.
+        value (str): The paramter value.
+    """
+
     if not value or ctx.resilient_parsing:
         return
 
@@ -47,6 +63,15 @@ def print_reporters(ctx, param, value):
 
 
 def check_reporter(name):
+    """Check if a reporter exists.
+
+    Args:
+        name (str): The reporter name.
+
+    Returns:
+        str: The name again in lowercase.
+    """
+
     name = name.lower()
 
     reporters = get_reporter_names()
@@ -66,6 +91,18 @@ def check_reporter(name):
 
 
 def to_bool(value):
+    """Convert a value to a boolean.
+
+    Args:
+        value (:obj:`bool` or :obj:`str`): The value to convert.
+
+    Returns:
+        bool: The converted boolean.
+
+    Raises:
+        ValueError: If value is not a bool or "True" or "False".
+    """
+
     if type(value) == 'bool':
         return value
 
@@ -79,6 +116,16 @@ def to_bool(value):
 
 
 def load_dir(path, recursive):
+    """Load a directory.
+
+    Args:
+        path (str): The path to load.
+        recursive (bool): Whether to load subdirectories.
+
+    Returns:
+        int: The number of modules loaded.
+    """
+
     loaded = 0
 
     for inner_path in os.listdir(path):
@@ -92,6 +139,8 @@ def load_dir(path, recursive):
 
     return loaded
 
+
+# Make the click cli.
 
 @click.command(context_settings=settings, options_metavar='[options]')
 @click.argument('files', nargs=-1, metavar='[files]',
@@ -143,6 +192,8 @@ def run(files, **options):
     use_config = options['no_config'] is None or \
             not to_bool(options['no_config'])
 
+    # If a config should be used, load its values into options if
+    # they were not specified.
     if use_config and os.path.isfile(options['config']):
         config_file = click.open_file(options['config'], 'r+')
         config = yaml.load(config_file.read())
@@ -230,6 +281,7 @@ def run(files, **options):
 
     loaded = 0
 
+    # Load in all the modules specified.
     for path in files:
         if os.path.isfile(path):
             load_module(path)
@@ -237,10 +289,12 @@ def run(files, **options):
         elif os.path.isdir(path):
             loaded += load_dir(path, recursive)
 
+    # If no modules were loaded, don't try and print nothing.
     if loaded == 0:
         click.echo('No test files found.')
         return
 
+    # Run the tests.
     try:
         success = main_runner.run_tests()
     except Exception as e:
