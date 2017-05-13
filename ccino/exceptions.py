@@ -16,3 +16,7 @@ class TestDidNotRaise(CcinoException):
 
 class TestDidNotReturn(CcinoException):
     pass
+
+
+class UnknownSignature(CcinoException):
+    pass
