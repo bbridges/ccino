@@ -66,6 +66,16 @@ ccino test_math.py
 
 ```
 
+## Installation
+
+To install ccino from source run the following.
+
+```sh
+pip install git+ssh://git@github.com/bloof-bb/ccino.git
+```
+
+...and that's it!
+
 ## Usage
 
 #### Tests
