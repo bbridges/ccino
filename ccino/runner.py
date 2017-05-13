@@ -3,11 +3,9 @@ from __future__ import absolute_import
 import sys
 
 from .exceptions import CcinoBail
-from .hook import Hook
 from .reporters import get_reporter, get_reporter_names
-from .root import RootSuite
-from .suite import Suite
-from .test import Test
+from .fixtures import Test, Hook, Suite
+from .fixtures.root import RootSuite
 from .util import load_module, redirect_print, make_builtin
 from .util.decorator_wraps import combine_args_self
 from .util.timer import Timer
@@ -52,35 +50,35 @@ class Runner(object):
 
     @combine_args_self
     def test(self, func, desc=None):
-        test = Test(func, self._current_suite, desc)
+        test = Test(func, name=desc)
         self._current_suite.add_test(test)
 
         return func
 
     @combine_args_self
     def suite_setup(self, func, desc=None):
-        hook = Hook(func, self._current_suite, desc)
+        hook = Hook(func, name=desc)
         self._current_suite.add_suite_setup(hook)
 
         return func
 
     @combine_args_self
     def suite_teardown(self, func, desc=None):
-        hook = Hook(func, self._current_suite, desc)
+        hook = Hook(func, name=desc)
         self._current_suite.add_suite_teardown(hook)
 
         return func
 
     @combine_args_self
     def setup(self, func, desc=None):
-        hook = Hook(func, self._current_suite, desc)
+        hook = Hook(func, name=desc)
         self._current_suite.add_setup(hook)
 
         return func
 
     @combine_args_self
     def teardown(self, func, desc=None):
-        hook = Hook(func, self._current_suite, desc)
+        hook = Hook(func, name=desc)
         self._current_suite.add_teardown(hook)
 
         return func

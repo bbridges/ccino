@@ -5,8 +5,7 @@ import traceback
 
 import blessings
 
-from ..hook import Hook
-from ..test import Test
+from ..fixtures import Test, Hook
 
 
 WINDOWS = sys.platform == 'win32'
