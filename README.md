@@ -68,7 +68,7 @@ ccino test_math.py
 
 ## Installation
 
-To install ccino from source run the following.
+To install ccino from source run the following:
 
 ```sh
 pip install git+ssh://git@github.com/bloof-bb/ccino.git
@@ -170,7 +170,7 @@ For approximate numbers use `@returns(value, approx=1e-10)`.
 
 #### Raises
 
-To ensure a test raises a specific exception use `@returns(exception)` above a
+To ensure a test raises a specific exception use `@raises(exception)` above a
 test.
 
 #### Skipping
@@ -183,7 +183,8 @@ To make this vary on a condition just use `@skip(condition)`.
 If a test throws an error they are printed gracefully. Exceptions are printed
 like in node.js. The last calling frame is printed at the top, and for
 readability, the line context is hidden to make them shorter (they can be
-shown by an option in the CLI).
+shown by an option in the CLI). The tests will keep running even if one fails
+by default.
 
 ```
 
